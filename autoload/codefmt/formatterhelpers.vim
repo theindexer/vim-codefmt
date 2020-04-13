@@ -15,6 +15,10 @@
 
 let s:plugin = maktaba#plugin#Get('codefmt')
 
+function! HandleOut(env, result) abort
+  let l:formatted = split(a:result.stdout, "\n")
+  call maktaba#buffer#Overwrite(1, line('$'), l:formatted)
+endfunction
 
 ""
 " @public
@@ -28,10 +32,7 @@ function! codefmt#formatterhelpers#Format(cmd) abort
   let l:lines = getline(1, line('$'))
   let l:input = join(l:lines, "\n")
 
-  let l:result = maktaba#syscall#Create(a:cmd).WithStdin(l:input).Call()
-  let l:formatted = split(l:result.stdout, "\n")
-
-  call maktaba#buffer#Overwrite(1, line('$'), l:formatted)
+  call maktaba#syscall#Create(a:cmd).WithStdin(l:input).CallAsync('HandleOut', 1)
 endfunction
 
 
